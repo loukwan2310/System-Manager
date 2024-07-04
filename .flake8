@@ -1,0 +1,15 @@
+[flake8]
+extend-ignore =
+    F405,
+    F841
+exclude =
+    .git,
+    __pycache__,
+    old,
+    build,
+    dist,
+    scripts,
+    locale,
+    env,
+    venv
+max-line-length=120

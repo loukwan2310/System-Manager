@@ -1,0 +1,96 @@
+version: '3.7'
+
+services:
+  mysql-prod:
+    container_name: mysql-prod
+    image: mysql:8.0
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    env_file:
+      - .env
+    environment:
+      - 'MYSQL_DATABASE=${DATABASE_NAME}'
+      - 'MYSQL_USER=${DATABASE_USER}'
+      - 'MYSQL_PASSWORD=${DATABASE_PASSWORD}'
+      - 'MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}'
+    ports:
+      - '${DATABASE_PORT}:3306'
+    healthcheck:
+      test: ["CMD-SHELL", 'mysqladmin ping -h localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./tmp/mysql_prod:/var/lib/mysql
+    networks:
+      - proxy-net-prod
+
+  redis-prod:
+    image: redis:7-alpine
+    container_name: redis-prod
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - ./tmp/redis_prod:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+    networks:
+      - proxy-net-prod
+
+  webapi-prod:
+    container_name: webapi-prod
+    restart: always
+    build:
+      context: .
+      target: backenddeploy
+    env_file:
+      - .env
+    expose:
+      - 8000
+    volumes:
+      - ./:/app
+      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
+    depends_on:
+      mysql-prod:
+        condition: service_healthy
+    networks:
+      - proxy-net-prod
+
+  celery-prod:
+    build:
+      context: .
+      target: backenddeploy
+    container_name: celery-prod
+    restart: unless-stopped
+    command: celery -A project worker -B -l INFO
+    volumes:
+      - ./:/app
+      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
+    env_file:
+      - .env
+    depends_on:
+      - webapi-prod
+      - redis-prod
+    networks:
+      - proxy-net-prod
+
+  nginx-prod:
+    container_name: nginx-prod
+    image: nginx:1.23.4
+    restart: unless-stopped
+    volumes:
+      - ./configs/nginx/prod:/etc/nginx/conf.d
+    ports:
+      - '${DJANGO_PORT}:80'
+    networks:
+      - proxy-net-prod
+    depends_on:
+      - webapi-prod
+
+networks:
+  proxy-net-prod:
+    name: internal_network_for_prod

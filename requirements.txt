@@ -1,0 +1,15 @@
+Django==5.0.6
+python-decouple==3.8
+psycopg==3.1.19
+drf-spectacular==0.27.2
+PyJWT==2.8.0
+djangorestframework==3.15.1
+markdown==3.6
+django-filter==24.2
+oauthlib==3.2.2
+requests==2.32.3
+google-api-python-client==2.132.0
+google_auth_oauthlib==1.2.0
+cryptography==42.0.8
+sendgrid==6.11.0
+pyotp==2.9.0

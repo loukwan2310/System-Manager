@@ -1,0 +1,199 @@
+version: '3.7'
+
+services:
+
+  db:
+    container_name: system_manager_db
+    image: postgres:latest
+    ports:
+      - '${DB_PORT}:5432'
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASS}
+    logging:
+      driver: "local"
+    volumes:
+      - ./tmp/postgres:/var/lib/postgresql/data/
+    networks:
+      - proxy-net
+
+  adminer:
+    container_name: system_manager_adminer
+    image: adminer
+    ports:
+      - 5050:8080
+    environment:
+      - ADMINER_DESIGN=mvt
+    logging:
+      driver: "local"
+    networks:
+      - proxy-net
+
+  dbsetup:
+    container_name: system_manager_dbsetup
+    build:
+      context: .
+      target: dbsetupdev
+      args:
+        - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+        - BUILD_TYPE=${BUILD_TYPE}
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/bin/test -f /opt/dbsetup_success"]
+      interval: 5s
+      timeout: 180s
+      retries: 100
+      start_period: 5s
+    tty: true
+    volumes:
+      - ./:/app
+#      - ./configs/.bashrc:/root/.bashrc
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PASS=pass
+      - DB_USER=postgres
+    depends_on:
+      db:
+        condition: service_started
+    networks:
+      - proxy-net
+
+  dbmigration:
+    container_name: system_manger_dbmigration
+    build:
+      context: .
+      target: dbmigrationdev
+      args:
+        - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+        - BUILD_TYPE=${BUILD_TYPE}
+    healthcheck:
+      test: [ "CMD-SHELL", "/usr/bin/test -f /opt/dbmigration_success" ]
+      interval: 5s
+      timeout: 180s
+      retries: 100
+      start_period: 5s
+    tty: true
+    volumes:
+      - ./:/app
+#      - ./configs/.bashrc:/root/.bashrc
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PASS=pass
+      - DB_USER=postgres
+    depends_on:
+      db:
+        condition: service_started
+      dbsetup:
+        condition: service_healthy
+    networks:
+      - proxy-net
+
+#  webapi-dev:
+#    container_name: webapi-dev
+#    restart: always
+#    build:
+#      context: .
+#      target: backenddev
+#    env_file:
+#      - .env
+#    expose:
+#      - 8000
+#    volumes:
+#      - ./:/app
+##      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
+#    depends_on:
+#      db:
+#        condition: service_started
+#      dbsetup:
+#        condition: service_healthy
+#    networks:
+#      - proxy-net
+
+#  redis-dev:
+#    image: redis:7-alpine
+#    container_name: redis-dev
+#    restart: unless-stopped
+#    env_file:
+#      - .env
+#    command: redis-server --requirepass ${REDIS_PASSWORD}
+#    ports:
+#      - "${REDIS_PORT}:6379"
+#    volumes:
+#      - ./tmp/redis_dev:/data
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "-a", "redispass", "ping" ]
+#      interval: 2s
+#      timeout: 3s
+#      retries: 3
+#    networks:
+#      - proxy-net
+#
+#  celery-dev:
+#    build:
+#      context: .
+#      target: backenddev
+#    container_name: celery-dev
+#    restart: unless-stopped
+#    command: celery -A project worker -B -l INFO
+#    volumes:
+#      - ./:/app
+##      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
+#    env_file:
+#      - .env
+#    depends_on:
+#      - webapi-dev
+#      - redis-dev
+#    networks:
+#      - proxy-net
+
+
+#  redis:
+#    image: 'bitnami/redis:latest'
+#    container_name: redis
+#    restart: unless-stopped
+#    environment:
+#      - REDIS_PASSWORD=redispass
+#    ports:
+#      - "6378:6379"
+#    volumes:
+#      - ./redis:/data
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "-a", "redispass", "ping" ]
+#      interval: 2s
+#      timeout: 3s
+#      retries: 3
+#
+#  celery:
+#    image: celery:4.0.2
+#    environment:
+#      - CELERY_ACCEPT_CONTENT=json,msgpack,yaml  # Add 'pickle' only if necessary
+#      - CELERY_TASK_SERIALIZER=json
+#      - CELERY_RESULT_SERIALIZER=json
+#      - CELERY_BROKER_URL=redis://:redispass@redis:6379/0
+#      - CELERY_TIMEZONE=UTC
+#
+#    volumes:
+#      - ./celery:/data
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+
+#
+#  nginx-dev:
+#    container_name: nginx-dev
+#    image: nginx:latest
+#    restart: unless-stopped
+#    volumes:
+#      - ./configs/nginx/dev:/etc/nginx/conf.d
+#    ports:
+#      - '${NGINX_PORT}:80'
+#    networks:
+#      - proxy-net
+#    depends_on:
+#      - webapi-dev
+
+networks:
+  proxy-net:
+    name: internal_network_for_dev
