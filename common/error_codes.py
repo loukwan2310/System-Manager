@@ -124,6 +124,10 @@ HTTP_400_BAD_REQUEST = {
     400023: _("Invalid end_time."),
     400024: _("Invalid exercise_type_id."),
     400025: _("The user has not completed the resting heart rate measurement."),
+    400026: _("The user email is invalid."),
+    400027: _("The otp is not match."),
+    400028: _("The otp is expired."),
+    400029: _("The user was activated."),
 }
 
 HTTP_401_UNAUTHORIZED = {

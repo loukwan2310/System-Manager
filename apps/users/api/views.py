@@ -9,7 +9,7 @@ from common.pagination import CustomPagination
 from common.serializers import ErrorResponse
 from common.constants import FITBIT_RESPONSE_TYPE, FITBIT_CHALLENGE_METHOD, FITBIT_SCOPE
 from .serializers import MyProfileResponse, MyConfigResponse, UpdateMyProfileRequest, UpdateMyProfileResponse, \
-    UserHairStyleListRequest, UserHairStyleListResponse
+    UserHairStyleListRequest, UserHairStyleListResponse, FitbitConfigInfoResponse
 
 
 @extend_schema(tags=['Users'])
@@ -49,16 +49,7 @@ class MyConfigAPIView(APIView):
 
     @extend_schema(responses={200: MyConfigResponse, 400: ErrorResponse, 500: ErrorResponse})
     def get(self, request):
-        fitbit_config = {
-            'client_id': settings.FITBIT_CLIENT_ID,
-            'code_challenge': settings.FITBIT_CODE_CHALLENGE,
-            'response_type': FITBIT_RESPONSE_TYPE,
-            'code_challenge_method': FITBIT_CHALLENGE_METHOD,
-            'scope': FITBIT_SCOPE
-        }
-        response = MyConfigResponse({
-            'fitbit': fitbit_config
-        })
+        response = FitbitConfigInfoResponse()
         return Response(response.data)
 
 
