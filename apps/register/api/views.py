@@ -1,4 +1,3 @@
-import googleapiclient.discovery
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers
@@ -20,9 +19,8 @@ class GoogleLoginRedirectApi(APIView):
         google_login_flow = GoogleRawLoginFlowService()
 
         authorization_url, state = google_login_flow.get_authorization_url()
-        print(state, "0000000")
         request.session["google_oauth2_state"] = state
-
+        print(state, "state")
         return HttpResponse(authorization_url, content_type="text/html; charset=utf-8")
 
 
@@ -39,34 +37,44 @@ class GoogleLoginApi(APIView):
     serializer_class = InputSerializer
 
     def get(self, request, *args, **kwargs):
+        import google_auth_oauthlib.flow
+        print(dict(request.session), "session")
+        # state = request.session["google_oauth2_state"]
+        # print(state, "00000000")
+        # flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        #     'client_secret.json',
+        #     scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
+        #     state=state)
+        # flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+
         # Here we have made the request validations.
 
-        google_login_flow = GoogleRawLoginFlowService()
-        code = request.query_params.get("code")
-        google_tokens = google_login_flow.get_tokens(code=code)
-        # print(google_tokens.id_token)
-        # print(google_tokens)
-        user_infor = google_login_flow.get_user_info(google_tokens)
-        # drive = googleapiclient.discovery.build(
-        #     API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-        # files = drive.files().list().execute()
-        id_token_decoded = google_tokens.decode_id_token()
-        # print(user_infor)
-        user_email = id_token_decoded["email"]
-
-        # user = user_get(email=user_email)
-
-        # if user is None:
-        #     return Response(
-        #         {"error": f"User with email {user_email} is not found."},
-        #         status=status.HTTP_404_NOT_FOUND
-        #     )
-
-        # login(request, user)
+        # google_login_flow = GoogleRawLoginFlowService()
+        # code = request.query_params.get("code")
+        # google_tokens = google_login_flow.get_tokens(code=code)
+        # # print(google_tokens.id_token)
+        # # print(google_tokens)
+        # user_infor = google_login_flow.get_user_info(google_tokens)
+        # # drive = googleapiclient.discovery.build(
+        # #     API_SERVICE_NAME, API_VERSION, credentials=credentials)
+        #
+        # # files = drive.files().list().execute()
+        # id_token_decoded = google_tokens.decode_id_token()
+        # # print(user_infor)
+        # user_email = id_token_decoded["email"]
+        #
+        # # user = user_get(email=user_email)
+        #
+        # # if user is None:
+        # #     return Response(
+        # #         {"error": f"User with email {user_email} is not found."},
+        # #         status=status.HTTP_404_NOT_FOUND
+        # #     )
+        #
+        # # login(request, user)
 
         result = {
-            "id_token_decoded": id_token_decoded,
+            "id_token_decoded": "id_token_decoded",
             # "user_info": user_info,
         }
 

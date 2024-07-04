@@ -28,25 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
-    # 'fcm_django',
-    # 'apps.authentication',
+    'apps.authentication',
     'apps.users',
-    # 'apps.exercises',
-    # 'apps.missions',
-    # 'apps.devices',
-    # 'apps.notifications',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
-]
-
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 MIDDLEWARE = [
@@ -58,9 +41,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    # Add the account middleware:
-    "allauth.account.middleware.AccountMiddleware"
-
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -143,6 +123,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -207,38 +188,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_TASK_TRACK_STARTED = True
 
-FITBIT_CLIENT_ID = config('FITBIT_CLIENT_ID', cast=str)
-FITBIT_CLIENT_SECRET = config('FITBIT_CLIENT_SECRET', cast=str)
-FITBIT_CODE_VERIFIER = config('FITBIT_CODE_VERIFIER', cast=str)
-FITBIT_CODE_CHALLENGE = config('FITBIT_CODE_CHALLENGE', cast=str)
-FITBIT_ACCESS_TOKEN_EXPIRE_HOURS = config('FITBIT_ACCESS_TOKEN_EXPIRE_HOURS', cast=int, default=24)
-
 BASE_BACKEND_URL = "http://127.0.0.1:8000"
 GOOGLE_OAUTH2_CLIENT_ID = "1018918224641-3uqu4jsf13ga7qs9mu9d020qheflljlo.apps.googleusercontent.com"
 GOOGLE_OAUTH2_CLIENT_SECRET = "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"
 GOOGLE_OAUTH2_PROJECT_ID = "django-oauth2-425714"
-# REDIRECT_URI = "/api/v1/accounts/google-oauth2/login/callback"
 
-# from allauth.socialaccount.providers.google import views
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        'APP': {
-            'client_id': GOOGLE_OAUTH2_CLIENT_ID,
-            'secret': GOOGLE_OAUTH2_CLIENT_SECRET,
-            # 'key': GOOGLE_OAUTH2_PROJECT_ID
-        },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'offline',
-        },
-        'OAUTH_PKCE_ENABLED': True,
-        'REDIRECT_URI': 'http://127.0.0.1:8000/api/v1/accounts/google-oauth2/login/callback'
-    }
-}
+SENDGRID_API_KEY = config('SENDGRID_API_KEY', cast=str)
+SENDER_EMAIL = config('SENDER_EMAIL', cast=str)

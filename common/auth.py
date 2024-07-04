@@ -4,6 +4,7 @@ from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from rest_framework import HTTP_HEADER_ENCODING
 from rest_framework.authentication import BaseAuthentication
 
+from apps.authentication.models import BannedTokens
 from common.exceptions import Unauthorized
 from common.jwt_manager import JWTManager
 
@@ -32,17 +33,17 @@ class BearerAuthSchema(OpenApiAuthenticationExtension):
 class JWTAuth(BaseAuthentication, BearerAuthSchema):
 
     @staticmethod
-    def _get_header(request):
+    def _get_authorization_header(request):
         header = request.META.get('HTTP_AUTHORIZATION')
         if isinstance(header, str):
             header = header.encode(HTTP_HEADER_ENCODING)
         return header
 
     @staticmethod
-    def _get_token(header):
-        if not header:
+    def _get_token(authorization_header):
+        if not authorization_header:
             return None
-        parts = header.split()
+        parts = authorization_header.split()
         if len(parts) == 0:
             return None
         if parts[0] not in AUTH_HEADER_TYPE:
@@ -52,10 +53,12 @@ class JWTAuth(BaseAuthentication, BearerAuthSchema):
         return parts[1]
 
     def authenticate(self, request):
-        header = self._get_header(request)
-        token = self._get_token(header)
+        authorization_header = self._get_authorization_header(request)
+        token = self._get_token(authorization_header)
         if not token:
             return None
+        if BannedTokens.objects.filter(token=token).exists():
+            raise Unauthorized(401003)
         payload = JWTManager.decode_token(token, secret_key=settings.SECRET_KEY)
         user_id = payload.get('sub')
 

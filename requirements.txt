@@ -8,11 +8,8 @@ markdown==3.6
 django-filter==24.2
 oauthlib==3.2.2
 requests==2.32.3
-
-
-
 google-api-python-client==2.132.0
 google_auth_oauthlib==1.2.0
-
-django-allauth==0.63.3
-cryptography
+cryptography==42.0.8
+sendgrid==6.11.0
+pyotp==2.9.0
