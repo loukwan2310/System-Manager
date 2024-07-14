@@ -29,8 +29,6 @@ jobs:
         echo '${{ toJson(vars) }}' > vars.json
         cat vars.json | jq -r 'to_entries | .[] | "echo " + .key + "=" + .value + " >> .env"' > export_env.sh
         bash export_env.sh
-    - name: Validate .env file
-      run: cat .env
     - name: Deploy
       run: |
         docker-compose down && docker-compose build && docker-compose up -d --force-recreate
