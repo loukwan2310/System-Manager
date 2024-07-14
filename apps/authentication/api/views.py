@@ -13,7 +13,8 @@ from rest_framework.views import APIView
 
 from apps.authentication.api.serializers import (LoginRequest, LoginResponse, RegisterRequest, RegisterResponse,
                                                  VerifyOTPCodeRequestSerializer, VerifyOTPCodeResponseSerializer,
-                                                 SendGridEmailRequestSerializer, SendGridEmailRequestResponse)
+                                                 SendGridEmailRequestSerializer, SendGridEmailRequestResponse,
+                                                 GetOTPCodeResponseSerializer)
 from apps.authentication.models import BannedTokens
 from apps.users.models import User
 from apps.users.models.user import UserOTP
@@ -106,10 +107,18 @@ class RegisterAPIView(APIView):
 
 
 @extend_schema(tags=['Authentication'])
-class VerifyOTPCodeAPIView(APIView, TokenAuthentication):
+class OTPCodeAPIView(APIView, TokenAuthentication):
     authentication_classes = []
     permission_classes = []
 
+    @transaction.atomic()
+    @extend_schema(auth=[], responses={200: VerifyOTPCodeResponseSerializer, 400: ErrorResponse, 500: ErrorResponse})
+    def get(self, request):
+        all_otp = UserOTP.objects.all()
+        response = GetOTPCodeResponseSerializer(all_otp, many=True)
+        return Response(response.data)
+
+    @transaction.atomic()
     @extend_schema(auth=[], request=VerifyOTPCodeRequestSerializer,
                    responses={200: VerifyOTPCodeResponseSerializer, 400: ErrorResponse, 500: ErrorResponse})
     def post(self, request):

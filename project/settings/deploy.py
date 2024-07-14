@@ -64,14 +64,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'project.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME', cast=str),
         'USER': config('DB_USER', cast=str),
         'PASSWORD': config('DB_PASS', cast=str),
-        'HOST': 'localhost',
+        'HOST': config('DB_HOST', cast=str),
         'PORT': config('DB_PORT', cast=int),
         'TEST': {
             'NAME': config('DB_NAME', cast=str)
