@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.users.api.serializers import MyProfileResponse
 from apps.users.models import User
 
 
@@ -61,3 +62,11 @@ class SendGridEmailRequestSerializer(serializers.Serializer):
 
 class SendGridEmailRequestResponse(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class GetOTPCodeResponseSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    counter = serializers.IntegerField(default=0)
+    max_retries = serializers.IntegerField(default=3)
+    expire_time = serializers.DateTimeField()
+    target_user = MyProfileResponse()

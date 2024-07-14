@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from apps.users.models import User
 from common.error_codes import HTTP_400_BAD_REQUEST
 
 
@@ -39,22 +40,8 @@ class MyProfileResponse(serializers.Serializer):
     name = serializers.CharField()
     birthday = serializers.DateTimeField()
     gender = serializers.IntegerField()
-    hair_style = UserHairStyleInfoResponse()
-    avatar_code = serializers.CharField()
-    training_level = UserTrainingLevelInfoResponse()
-    training_point = serializers.IntegerField()
-    resting_heart_rate = serializers.IntegerField()
-    target_heart_rate = serializers.IntegerField()
     created_at = serializers.DateTimeField()
     updated_at = serializers.DateTimeField()
-    total_usage_days = serializers.SerializerMethodField()
-    fitbit_user = FitbitUserInfoResponse()
-
-    def get_total_usage_days(self, obj) -> int:
-        start_date = obj.created_at.date()
-        current_date = timezone.localtime(timezone.now()).date()
-        total_usage_days = (current_date - start_date).days
-        return total_usage_days
 
 
 class FitbitConfigInfoResponse(serializers.Serializer):
@@ -72,7 +59,6 @@ class MyConfigResponse(serializers.Serializer):
 class UpdateMyProfileRequest(serializers.Serializer):
     name = serializers.CharField(max_length=24)
     birthday = serializers.DateTimeField()
-    hair_style_id = serializers.IntegerField(min_value=1)
     gender = serializers.IntegerField(min_value=1, max_value=3)
 
     def validate(self, attrs):
@@ -96,7 +82,6 @@ class UpdateMyProfileResponse(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     birthday = serializers.DateTimeField()
-    hair_style_id = serializers.IntegerField()
     gender = serializers.IntegerField()
 
 

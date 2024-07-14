@@ -57,7 +57,7 @@ class UserOTP(BaseModel):
     counter = models.IntegerField(default=0)
     max_retries = models.IntegerField(default=3)
     expire_time = models.DateTimeField()
-    target_user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    target_user = models.ForeignKey("User", on_delete=models.CASCADE)
 
     @staticmethod
     def _generate_otp_code():

@@ -90,26 +90,48 @@ services:
     networks:
       - proxy-net
 
-#  webapi-dev:
-#    container_name: webapi-dev
-#    restart: always
-#    build:
-#      context: .
-#      target: backenddev
-#    env_file:
-#      - .env
-#    expose:
-#      - 8000
-#    volumes:
-#      - ./:/app
-##      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
-#    depends_on:
-#      db:
-#        condition: service_started
-#      dbsetup:
-#        condition: service_healthy
-#    networks:
-#      - proxy-net
+  webapi-dev:
+    container_name: webapi-dev
+    restart: always
+    build:
+      context: .
+      target: backenddev
+    env_file:
+      - .env
+    expose:
+      - 8000
+    volumes:
+      - ./:/app
+#      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
+    depends_on:
+      db:
+        condition: service_started
+      dbsetup:
+        condition: service_healthy
+    networks:
+      - proxy-net
+
+
+  webapi-dev-1:
+    container_name: webapi-dev-1
+    restart: always
+    build:
+      context: .
+      target: backenddev
+    env_file:
+      - .env
+    expose:
+      - 8000
+    volumes:
+      - ./:/app
+    #      - ${FIREBASE_ADMIN_CONFIG_PATH}:/app/configs/firebase/config.json
+    depends_on:
+      db:
+        condition: service_started
+      dbsetup:
+        condition: service_healthy
+    networks:
+      - proxy-net
 
 #  redis-dev:
 #    image: redis:7-alpine
@@ -181,18 +203,18 @@ services:
 #        condition: service_healthy
 
 #
-#  nginx-dev:
-#    container_name: nginx-dev
-#    image: nginx:latest
-#    restart: unless-stopped
-#    volumes:
-#      - ./configs/nginx/dev:/etc/nginx/conf.d
-#    ports:
-#      - '${NGINX_PORT}:80'
-#    networks:
-#      - proxy-net
-#    depends_on:
-#      - webapi-dev
+  nginx-dev:
+    container_name: nginx-dev
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./configs/nginx/dev:/etc/nginx/conf.d
+    ports:
+      - '${NGINX_PORT}:80'
+    networks:
+      - proxy-net
+    depends_on:
+      - webapi-dev
 
 networks:
   proxy-net:
